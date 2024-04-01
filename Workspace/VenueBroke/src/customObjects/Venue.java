@@ -37,39 +37,13 @@ public class Venue extends Client {
 		// Temporary string to build with venue details.
 		String temp = "";
 		
-		// Temporary stringbuilder object to build with
-		// venue suitability details.
-		StringBuilder suitable = new StringBuilder();
-		
-		int count = 0;
-		
-		// Iterate through the suitableFor array, and
-		// add each suitablity to a stringbuilder object.
-		while (count < suitableFor.length) {
-			
-			// Catch NullPointerException if an element is null.
-			try {
-				
-				// Append suitable with current suitableFor element.
-				suitable.append(suitableFor[count] + ", ");
-				count++;
-				
-			} catch (NullPointerException e) {
-				System.out.print("Error. Suitability element missing.");
-			}
-		}
-		
-		// Catch NullPointerException if one or more elements are null.
-		try {
-			
-			// Build single-line string with venue details.
-			temp = "Name: " + this.client + " "
-					+ "Capacity: " + this.capacity + " "
-					+ "Suitable For: " + suitable + " "
-					+ "Category: " + this.category;
-		} catch (NullPointerException e) {
-			System.out.println("Error. One or more venue details are incomplete.");
-		}
+		// Build single-line string with venue details.
+		temp =  "Client ID: " + this.clientID + " "
+				+ "Name: " + this.client + " "
+				+ "Capacity: " + this.capacity + " "
+				+ "Suitable For: " + this.suitableForToString() + " "
+				+ "Category: " + this.category + " "
+				+ "Hire Fee: " + this.hourlyPrice;
 		
 		// Return string of venue details.
 		return temp;
@@ -84,11 +58,20 @@ public class Venue extends Client {
 		
 		// Iterate through suitableFor elements and add
 		// them to a single-line string.
-		for (String s : suitableFor) {
+		for (int i = 0; i < suitableFor.length; i++) {
 			
-			suitableForString += (s + ", ");
+			// Append string with current suitability details.
+			suitableForString += suitableFor[i];
 			
+			// If there are more elements in the array, add a comma and space.
+			if ( (i+1) < suitableFor.length) {
+				
+				suitableForString += ", ";
+				
+			}
 		}
+		
+		
 		
 		// Return string of suitability elements.
 		return suitableForString;
@@ -134,5 +117,10 @@ public class Venue extends Client {
 	
 	public void setHourlyPrice(int hourlyPrice) {
 		this.hourlyPrice = hourlyPrice;
+	}
+
+	@Override
+	public int getClientID() {
+		return this.clientID;
 	}
 }

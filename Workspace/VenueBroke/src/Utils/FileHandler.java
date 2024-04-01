@@ -1,10 +1,14 @@
-package Utils;
+package utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import CustomExceptions.FileHandlerException;
 import customObjects.*;
 
 // A custom class used to import event request and venue details from
@@ -17,17 +21,19 @@ public class FileHandler {
 	// Define file path as file object composed of filepath from local
 	// system appended with filepath of data folder, then either request,
 	// or venue folder.
-	private static final File REQUESTS = new File(localDir 
-													+ "\\data\\requests.csv");
-	private static final File VENUES = new File (localDir 
-													+ "\\data\\venues.csv");
+	private static final File REQUESTS = new File(localDir + "\\data\\requests.csv");
+	private static final File VENUES = new File (localDir + "\\data\\venues.csv");
+	
+	// Initialize formatters for date and time variables.
+	public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mma");
 	
 	// Define delimeter variable to indicate which character to separate
 	// each line at.
 	private static final String DELIMETER = ",|\\n";
 	
 	// Method used to import event request information as lines which are
-	// seperated using a delimeter. Information is used to fill an array 
+	// separated using a delimeter. Information is used to fill an array 
 	// list of event objects, which is returned to the calling method.
 	public static ArrayList<Event> importRequestList() {
 		
@@ -39,7 +45,9 @@ public class FileHandler {
 		String tempTitle;
 		String tempArtist;
 		String tempDate;
+		LocalDate date;
 		String tempTime;
+		LocalTime time;
 		int tempTarget = 0;
 		int tempDuration = 0;
 		String tempType;
@@ -51,14 +59,14 @@ public class FileHandler {
 		// Define scanner variable and catch IOException if file not found.
 		try(Scanner scanner = new Scanner(REQUESTS)) {
 			
-			// Add delimeter to scanner.
+			// Add delimiter to scanner.
 			scanner.useDelimiter(DELIMETER);
 			
 			// Skip first line of labeling information.
 			scanner.nextLine();
 			
 			// Inform user that requests are being imported.
-			System.out.print("Loading requests... ");
+			System.out.print("\nLoading requests... ");
 			
 				// While there are more lines to be read, iterate through each
 				// line and use the information to create a new event object then 
@@ -72,7 +80,48 @@ public class FileHandler {
 					tempTitle = scanner.next().strip();
 					tempArtist = scanner.next().strip();
 					tempDate = scanner.next().strip();
+					// Check if date is within range. If not, throw FileHandlerException.
+					try {
+						// If the date does not contain enough characters.
+						if (tempDate.length() < 10) {
+							// Split the date fields.
+							String[] temp = tempDate.split("/");
+							// If both day and month are too short, add a digit.
+							if (temp[0].length() == 1 && temp[1].length() == 1) {
+								tempDate = "0" + temp[0] + "/0" + temp[1] + "/" + temp[2];	
+							// If only month is to short, add a digit.
+							}	else if (temp[0].length() == 2 && temp[1].length() == 1) {
+								tempDate = temp[0] + "/0" + temp[1] + "/" + temp[2];
+							// If only day is to short, add a digit.
+							} else if (temp[0].length() == 1 && temp[1].length() == 2) {
+								tempDate = "0" + tempDate;
+							// If date range is too large, throw FileHandlerException.
+							} 	else {
+								throw new FileHandlerException(tempTitle, "Event Date", tempDate);
+							}
+						}
+					} catch (FileHandlerException e1) {
+						e1.printStackTrace();
+					}
+					//Initialize date variable with parsed date String from CSV.
+					date = LocalDate.parse(tempDate, dateFormatter);
 					tempTime = scanner.next().strip();
+					// Check if time is within range. If not, throw FileHandlerException.
+					try {
+						// Check if tempTime contains enough digits.
+						if (tempTime.length() < 7) {
+							tempTime = "0" + tempTime;
+						} else if (tempTime.length() > 7) {
+							throw new FileHandlerException(tempTitle, "Event Time", 
+									tempTime.length());
+						}
+					} catch (FileHandlerException e1) {
+						e1.printStackTrace();
+					}
+					// Initialize time variable with parsed time String from CSV.
+					time = LocalTime.parse(tempTime, timeFormatter);
+					// Catch NumberFormatException if tempTarget and tempDuration 
+					// entered incorrectly.
 					try {
 						tempTarget = Integer.parseInt(scanner.next().strip());
 						tempDuration = Integer.parseInt(scanner.next().strip());
@@ -87,8 +136,8 @@ public class FileHandler {
 					// Initialize new event object using information extracted from 
 					// line and add it to the event list.
 					tempEvents.add(new Event(tempClient, tempTitle, tempArtist, 
-												tempDate, tempTime, tempTarget, 
-												tempDuration, tempType, tempCategory));
+												date, time,	tempTarget, tempDuration, 
+												tempType, tempCategory));
 					
 					// Notify user of import progress then increment progress count.
 					System.out.print(count + "... ");

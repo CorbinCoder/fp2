@@ -1,4 +1,4 @@
-package Interfaces;
+package interfaces;
 
 // A custom interface used to define whether a custom class is bookable.
 // Contains a boolean variable called booked that can be alternated between

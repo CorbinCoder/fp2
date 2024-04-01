@@ -1,6 +1,9 @@
 package customObjects;
 
-import Interfaces.Bookable;
+import java.time.*;
+
+import interfaces.Bookable;
+import utils.FileHandler;
 
 // Class used to define an Event object. Events are performances
 // that are sold with the intention of attendees purchasing tickets.
@@ -14,8 +17,8 @@ public class Event extends Client implements Bookable {
 
 	private String title;
 	private String artist;
-	private String date;
-	private String time;
+	private LocalDate date;
+	private LocalTime time;
 	private int target;
 	private int duration;
 	private String type;
@@ -27,9 +30,8 @@ public class Event extends Client implements Bookable {
 	// require isBooked to be passed from the calling method, as it is defined 
 	// by the constructor.
 	public Event(String client, String title, String artist, 
-					String date, String time, int target, 
+					LocalDate date, LocalTime time, int target, 
 					int duration, String type, String category) {
-		
 		super(client);
 		this.title = title;
 		this.artist = artist;
@@ -40,6 +42,15 @@ public class Event extends Client implements Bookable {
 		this.type = type;
 		this.category = category;
 		this.isBooked = false;
+		formatDateTime();
+	}
+	
+	// Formats the date/time variables to accept the stream from the
+	// CSV file.
+	public void formatDateTime() {
+		
+		this.date.format(FileHandler.dateFormatter);
+		this.time.format(FileHandler.timeFormatter);
 		
 	}
 	
@@ -54,7 +65,9 @@ public class Event extends Client implements Bookable {
 		// Try/Catch to catch NullPointerException if one
 		// or more event details are null.
 		try {
-			temp = "Client: " + this.client + " " 
+			// Build temporary string with event details.
+			temp =  "ClientID: " + this.clientID + " "
+					+ "Client: " + this.client + " " 
 					+ "Title: " + this.title + " "
 					+ "Artist: " + this.artist + " " 
 					+ "Date: " + this.date + " "
@@ -79,14 +92,16 @@ public class Event extends Client implements Bookable {
 		// or more details are null.
 		try {
 			
-			System.out.printf("Client: %10s\n" 
-					+ "Event name: %10s\n"
-					+ "Artist: %10s\n"
-					+ "Event date: %10s\n"
-					+ "Event time: %10s\n"
-					+ "--------------------------------------------------\n",
-					this.client, this.title, 
-					this.artist, this.date, this.time);
+			System.out.printf("%-15s%d\n"
+								+ "%-15s%s\n" 
+								+ "%-15s%s\n"
+								+ "%-15s%s\n"
+								+ "%-15s%s\n"
+								+ "%-15s%s\n\n",
+								"Client ID: ", this.clientID, "Client: ", this.client, 
+								"Event Name: ", this.title, "Artist: ", this.artist, 
+								"Event Date: ", FileHandler.dateFormatter.format(this.date), 
+								"Event Time: ", FileHandler.timeFormatter.format(this.time));
 			
 		} catch (NullPointerException e1) {
 			System.out.println("Error. One or more event details are incomplete.");
@@ -107,8 +122,8 @@ public class Event extends Client implements Bookable {
 		this.isBooked = true;
 	}
 	
-	
 	// Various get/set methods.
+	
 	public String getClient() {
 		return this.client;
 	}
@@ -133,19 +148,19 @@ public class Event extends Client implements Bookable {
 		this.artist = artist;
 	}
 	
-	public String getDate() {
+	public LocalDate getDate() {
 		return this.date;
 	}
 	
-	public void setDate(String date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 	
-	public String getTime() {
+	public LocalTime getTime() {
 		return this.time;
 	}
 	
-	public void setTime(String time) {
+	public void setTime(LocalTime time) {
 		this.time = time;
 	}
 	
@@ -181,4 +196,8 @@ public class Event extends Client implements Bookable {
 		this.category = category;
 	}
 
+	@Override
+	public int getClientID() {
+		return this.getClientID();
+	}
 }
